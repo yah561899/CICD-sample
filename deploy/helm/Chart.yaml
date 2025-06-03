@@ -1,0 +1,5 @@
+apiVersion: v2
+name: sampleapi-helm
+description: A Helm chart for .NET Sample API
+version: 0.1.0
+appVersion: "latest"

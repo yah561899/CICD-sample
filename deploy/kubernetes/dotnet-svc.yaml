@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: dotnet-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: sampleapi
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8082          # Service 內部埠
+      targetPort: 8082    # Pod 內實際監聽埠，請依情況調整

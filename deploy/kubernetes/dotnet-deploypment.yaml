@@ -1,0 +1,47 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name:  sampleapi
+  labels:
+    name:  sampleapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sampleapi
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  sampleapi
+    spec:
+      containers:
+      - image:  sampleapi:latest
+        name:  sampleapi
+        resources:
+          requests:
+            cpu: "20m"
+            memory: "55M"
+        livenessProbe:
+          httpGet:
+            path: /api/HealthCheck/readiness
+            port: 8082
+          initialDelaySeconds: 90
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/HealthCheck/readiness
+            port: 8082
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+        env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Development"       
+        ports:
+        - containerPort:  8082
+          name:  sampleapi
+        imagePullPolicy: IfNotPresent

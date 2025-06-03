@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-exporter
+  labels:
+    app: prometheus-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-exporter
+  template:
+    metadata:
+      labels:
+        app: prometheus-exporter
+    spec:
+      containers:
+      - name: prometheus-exporter
+        # 這裡用一個公開的 exporter 映像作為範例，你可以改成你想要的
+        image: quay.io/prometheus/node-exporter:v1.5.0
+        args:
+          - "--path.procfs=/host/proc"
+          - "--path.sysfs=/host/sys"
+        ports:
+        - containerPort: 9100
+          name: metrics
+        volumeMounts:
+        - name: host-proc
+          mountPath: /host/proc
+        - name: host-sys
+          mountPath: /host/sys
+      volumes:
+      - name: host-proc
+        hostPath:
+          path: /proc
+      - name: host-sys
+        hostPath:
+          path: /sys
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-exporter-svc
+  labels:
+    app: prometheus-exporter
+spec:
+  selector:
+    app: prometheus-exporter
+  ports:
+  - name: metrics
+    port: 9100
+    targetPort: 9100
+    protocol: TCP
+  type: ClusterIP
