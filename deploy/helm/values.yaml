@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: sampleapi
+  repository: yah561899/sampleapi
   tag: latest
   pullPolicy: IfNotPresent
 
