@@ -1,5 +1,7 @@
 apiVersion: v2
-name: sampleapi-helm
-description: A Helm chart for .NET Sample API
-version: 0.1.0
-appVersion: "latest"
+appVersion: "1.0"
+description: A Helm chart for backend service
+maintainers:
+- name: Nick
+name: backend-service
+version: 1.0.0
