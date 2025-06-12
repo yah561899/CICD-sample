@@ -3,11 +3,14 @@ kind: Service
 metadata:
   name: {{ include "sampleapi.fullname" . }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.global.service.type }}
   selector:
     app: {{ include "sampleapi.fullname" . }}
   ports:
   - name: http
-    port: 8083
-    targetPortL: 8082
+    port: {{ .Values.global.service.port }}
+    targetPort: {{ .Values.global.service.targetPort }}
     protocol: TCP
+{{- if .Values.global.service.nodePort -}}
+    nodePort: {{ .Values.global.service.nodePort }}
+{{- end -}}

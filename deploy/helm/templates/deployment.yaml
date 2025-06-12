@@ -5,20 +5,20 @@ metadata:
   labels:
     app: {{ include "sampleapi.fullname" . }}
 spec:
-  {{- if .Values.revisionHistoryLimit }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- if .Values.global.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit }}
   {{- end }}
-  {{- if .Values.replicaCount }}
-  replicas: {{ .Values.replicaCount }}
+  {{- if .Values.global.replicaCount }}
+  replicas: {{ .Values.global.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
       app: {{ include "sampleapi.fullname" . }}
   strategy:
-    type: {{ .Values.strategy.type}}
+    type: {{ .Values.global.strategy.type}}
     rollingUpdate:
-      maxSurge: {{ .Values.strategy.rollingUpdate.maxSurge }}
-      maxUnavailable: {{ .Values.strategy.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.global.strategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.global.strategy.rollingUpdate.maxUnavailable }}
   template:
     metadata:
       labels:
@@ -26,11 +26,11 @@ spec:
     spec:
       containers:
       - name: {{ include "sampleapi.fullname" . }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         ports:
         - name: http
-          containerPort: {{ .Values.service.targetPort }}
+          containerPort: {{ .Values.global.service.targetPort }}
         env:
         {{- range $key, $value := .Values.env }}
           - name: {{ $key }}
@@ -38,18 +38,18 @@ spec:
         {{- end }}
         resources:
           requests:
-            cpu: "{{ .Values.resources.requests.cpu }}"
-            memory: "{{ .Values.resources.requests.memory }}"
+            cpu: "{{ .Values.global.resources.requests.cpu }}"
+            memory: "{{ .Values.global.resources.requests.memory }}"
         livenessProbe:
           httpGet:
-            path: {{ .Values.livenessProbe.path | quote }}
-            port: {{ .Values.livenessProbe.port }}
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            path: {{ .Values.global.livenessProbe.path | quote }}
+            port: {{ .Values.global.livenessProbe.port }}
+          initialDelaySeconds: {{ .Values.global.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.global.livenessProbe.timeoutSeconds }}
         readinessProbe:
           httpGet:
-            path: {{ .Values.readinessProbe.path | quote }}
-            port: {{ .Values.readinessProbe.port }}
-          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds}}
-          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
-          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            path: {{ .Values.global.readinessProbe.path | quote }}
+            port: {{ .Values.global.readinessProbe.port }}
+          initialDelaySeconds: {{ .Values.global.readinessProbe.initialDelaySeconds}}
+          timeoutSeconds: {{ .Values.global.readinessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.global.readinessProbe.periodSeconds }}
