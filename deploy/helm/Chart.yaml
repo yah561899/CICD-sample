@@ -4,4 +4,4 @@ description: A Helm chart for backend service
 maintainers:
 - name: Nick
 name: backend-service
-version: 1.0.2
+version: 1.0.3

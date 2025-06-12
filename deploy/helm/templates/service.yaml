@@ -3,17 +3,11 @@ kind: Service
 metadata:
   name: {{ include "sampleapi.fullname" . }}
 spec:
-  # type: {{ default "ClusterIP" .Values.service.type }}
   type: LoadBalancer
   selector:
     app: {{ include "sampleapi.fullname" . }}
   ports:
   - name: http
-    # port: {{ .Values.service.port }}
     port: 8083
-    # targetPort: {{ .Values.service.targetPort }}
     targetPortL: 8082
     protocol: TCP
-# {{- if .Values.service.nodePort -}}
-#     nodePort: {{ .Values.service.nodePort }}
-# {{- end -}}
