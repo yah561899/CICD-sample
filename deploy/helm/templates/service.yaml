@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "sampleapi.fullname" . }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ default "ClusterIP" .Values.service.type }}
   selector:
     app: {{ include "sampleapi.fullname" . }}
   ports:
