@@ -5,6 +5,7 @@
   collections:
     - kubernetes.core
   vars:
+    cluster_name: cluster1
     kubectl_version: v1.24.0
     helm_version: v3.8.0
     argocd_admin_password: "12345678!"
@@ -25,7 +26,7 @@
       when: not minikube_check.stat.exists
 
     - name: Start Minikube
-      command: minikube start
+      command: minikube start -p {{ cluster_name }} --driver=docker
       become: false
 
   tasks:
