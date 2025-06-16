@@ -6,8 +6,8 @@
     - kubernetes.core
   vars:
     cluster_name: cluster1
-    kubectl_version: v1.24.0
-    helm_version: v3.8.0
+    kubectl_version: v1.33.1
+    helm_version: v3.18.2
     argocd_admin_password: "12345678!"
     jenkins_admin_password: "12345678!"
   # 在執行其他任務前，先確保並安裝 Minikube
@@ -25,8 +25,16 @@
         mode: '0755'
       when: not minikube_check.stat.exists
 
-    - name: Start Minikube
+    - name: Check if Minikube cluster is already running
+      command: minikube status -p {{ cluster_name }}
+      register: minikube_status
+      ignore_errors: true
+      changed_when: false
+      become: false
+
+    - name: Start Minikube cluster if not running
       command: minikube start -p {{ cluster_name }} --driver=docker
+      when: "'Running' not in minikube_status.stdout"
       become: false
 
   tasks:
