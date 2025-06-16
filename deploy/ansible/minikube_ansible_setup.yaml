@@ -5,6 +5,7 @@
   collections:
     - kubernetes.core
   vars:
+    user_name: "{{ lookup('env','USER') }}"
     kubeconfig_path: "/home/{{ user_name }}/.kube/config"
     cluster_name: cluster1
     kubectl_version: v1.33.1
@@ -13,9 +14,9 @@
     jenkins_admin_password: "12345678!"
 
   pre_tasks:
-    - name: 顯示當前執行者
+    - name: Current user
       debug:
-        msg: "Current user: {{ username | default(lookup('env','USER')) }}"
+        msg: "Current user: {{ user_name }}"
 
     - name: Check if Minikube is installed
       stat:
