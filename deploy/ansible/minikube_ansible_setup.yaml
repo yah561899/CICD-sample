@@ -1,0 +1,181 @@
+---
+- name: Setup Kubernetes tools and applications in Minikube Linux environment
+  hosts: localhost
+  become: yes
+  collections:
+    - kubernetes.core
+    - community.kubernetes
+  vars:
+    kubectl_version: v1.24.0
+    helm_version: v3.8.0
+    argocd_new_password: "12345678!"
+    jenkins_new_password: "12345678!"
+  # 在執行其他任務前，先確保並安裝 Minikube
+  pre_tasks:
+    - name: Check if Minikube is installed
+      stat:
+        path: /usr/local/bin/minikube
+      register: minikube_check
+
+    - name: Download Minikube binary if not present
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+      when: not minikube_check.stat.exists
+
+    - name: Start Minikube
+      command: minikube start
+      become: false
+
+  tasks:
+    - name: Install APT dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Download kubectl binary
+      get_url:
+        url: https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+      args:
+        creates: /usr/local/bin/kubectl
+
+    - name: Download Helm archive
+      get_url:
+        url: https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz
+        dest: /tmp/helm.tar.gz
+        mode: '0644'
+      args:
+        creates: /usr/local/bin/helm
+
+    - name: Extract Helm
+      unarchive:
+        src: /tmp/helm.tar.gz
+        dest: /tmp
+        remote_src: yes
+
+    - name: Install Helm binary
+      copy:
+        remote_src: yes
+        src: /tmp/linux-amd64/helm
+        dest: /usr/local/bin/helm
+        mode: '0755'
+      args:
+        creates: /usr/local/bin/helm
+
+    - name: Add Helm repositories
+      shell: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm repo add jenkins https://charts.jenkins.io
+        helm repo add sonatype https://sonatype.github.io/helm3-charts
+      args:
+        creates: ~/.cache/helm/repository/repositories.yaml
+
+    - name: Update Helm repositories
+      command: helm repo update
+
+    - name: Create namespace for ArgoCD
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: argocd
+        state: present
+
+    - name: Install ArgoCD server
+      shell: kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      args:
+        creates: /usr/local/bin/argocd
+
+    # ArgoCD CLI 安裝、登入與修改密碼
+    - name: Check if ArgoCD CLI is installed
+      stat:
+        path: /usr/local/bin/argocd
+      register: argocd_cli
+
+    - name: Download ArgoCD CLI binary if not present
+      get_url:
+        url: https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        dest: /usr/local/bin/argocd
+        mode: '0755'
+      when: not argocd_cli.stat.exists
+
+    - name: Retrieve initial ArgoCD admin password
+      shell: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode
+      register: argocd_initial_password
+
+    - name: Login to ArgoCD using CLI
+      shell: argocd login localhost:8080 --username admin --password {{ argocd_initial_password.stdout }} --insecure
+      args:
+        creates: /tmp/argocd_cli_login
+
+    - name: Change ArgoCD admin password
+      shell: argocd account update-password --current-password {{ argocd_initial_password.stdout }} --new-password {{ argocd_new_password }}
+      args:
+        creates: /tmp/argocd_pass_changed
+
+    - name: Create namespace for Jenkins
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: jenkins
+        state: present
+
+    - name: Deploy Jenkins via Helm
+      community.kubernetes.helm:
+        name: jenkins
+        chart_ref: jenkins/jenkins
+        namespace: jenkins
+        create_namespace: false
+        values:
+          controller:
+            adminPassword: admin
+
+    - name: Create namespace for Nexus
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: nexus
+        state: present
+
+    - name: Deploy Nexus Repository Manager via Helm
+      community.kubernetes.helm:
+        name: nexus
+        chart_ref: sonatype/nexus-repository-manager
+        namespace: nexus
+        create_namespace: false
+
+    - name: Create namespace for Redis
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: redis
+        state: present
+
+    - name: Deploy Redis via Helm
+      community.kubernetes.helm:
+        name: redis
+        chart_ref: bitnami/redis
+        namespace: redis
+        create_namespace: false
+
+    - name: Create namespace for RabbitMQ
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: rabbitmq
+        state: present
+
+    - name: Deploy RabbitMQ via Helm
+      community.kubernetes.helm:
+        name: rabbitmq
+        chart_ref: bitnami/rabbitmq
+        namespace: rabbitmq
+        create_namespace: false
