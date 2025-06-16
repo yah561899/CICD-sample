@@ -3,7 +3,7 @@
   hosts: localhost
   connection: local            # 使用本機連線，避免 SSH 提示
   gather_facts: false          # 跳過自動收集 facts，以避免 sudo 密碼提示
-  become: yes
+  become: false
   collections:
     - kubernetes.core
   vars:
@@ -17,6 +17,7 @@
       stat:
         path: /usr/local/bin/minikube
       register: minikube_check
+      become: false
 
     - name: Download Minikube binary if not present
       get_url:
@@ -100,6 +101,7 @@
       stat:
         path: /usr/local/bin/argocd
       register: argocd_cli
+      become: false
 
     - name: Download ArgoCD CLI binary if not present
       get_url:
