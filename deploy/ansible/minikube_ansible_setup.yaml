@@ -79,14 +79,20 @@
         dest: /tmp
         remote_src: yes
 
-    - name: Install Helm binary
+    - name: Check if Helm binary exists
+      stat:
+        path: /usr/local/bin/helm
+      register: helm_binary_check
+      become: false
+
+    - name: Install Helm binary if not present
       copy:
         remote_src: yes
         src: /tmp/linux-amd64/helm
         dest: /usr/local/bin/helm
         mode: '0755'
-      args:
-        creates: /usr/local/bin/helm
+        force: no
+      when: not helm_binary_check.stat.exists
 
     - name: Add Helm repositories
       shell: |
