@@ -14,9 +14,9 @@
     jenkins_admin_password: "12345678!"
 
   pre_tasks:
-    - name: Current user
+    - name: Kubernetes Path
       debug:
-        msg: "Current user: {{ user_name }}"
+        msg: "Kubernetes path: {{ kubeconfig_path }}"
 
     - name: Check if Minikube is installed
       stat:
