@@ -1,8 +1,6 @@
 ---
 - name: Setup Kubernetes tools and applications in Minikube Linux environment
   hosts: localhost
-  connection: local            # 使用本機連線，避免 SSH 提示
-  gather_facts: false          # 跳過自動收集 facts，以避免 sudo 密碼提示
   become: false
   collections:
     - kubernetes.core
@@ -34,11 +32,11 @@
     - name: Install APT dependencies
       apt:
         name:
-          - apt-transport-https
-          - ca-certificates
+          # - apt-transport-https
+          # - ca-certificates
           - curl
-          - gnupg
-          - lsb-release
+          # - gnupg
+          # - lsb-release
         state: present
         update_cache: yes
 
