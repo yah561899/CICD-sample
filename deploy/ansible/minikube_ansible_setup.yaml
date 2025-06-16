@@ -1,7 +1,7 @@
 ---
 - name: Setup Kubernetes tools and applications in Minikube Linux environment
   hosts: localhost
-  become: false
+  become: yes
   collections:
     - kubernetes.core
   vars:
