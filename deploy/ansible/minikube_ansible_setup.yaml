@@ -1,10 +1,11 @@
 ---
 - name: Setup Kubernetes tools and applications in Minikube Linux environment
   hosts: localhost
+  connection: local            # 使用本機連線，避免 SSH 提示
+  gather_facts: false          # 跳過自動收集 facts，以避免 sudo 密碼提示
   become: yes
   collections:
     - kubernetes.core
-    - community.kubernetes
   vars:
     kubectl_version: v1.24.0
     helm_version: v3.8.0
@@ -129,7 +130,7 @@
         state: present
 
     - name: Deploy Jenkins via Helm
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         name: jenkins
         chart_ref: jenkins/jenkins
         namespace: jenkins
@@ -146,7 +147,7 @@
         state: present
 
     - name: Deploy Nexus Repository Manager via Helm
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         name: nexus
         chart_ref: sonatype/nexus-repository-manager
         namespace: nexus
@@ -160,7 +161,7 @@
         state: present
 
     - name: Deploy Redis via Helm
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         name: redis
         chart_ref: bitnami/redis
         namespace: redis
@@ -174,7 +175,7 @@
         state: present
 
     - name: Deploy RabbitMQ via Helm
-      community.kubernetes.helm:
+      kubernetes.core.helm:
         name: rabbitmq
         chart_ref: bitnami/rabbitmq
         namespace: rabbitmq
