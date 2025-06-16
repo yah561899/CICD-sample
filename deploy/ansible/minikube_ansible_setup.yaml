@@ -10,7 +10,7 @@
     helm_version: v3.18.2
     argocd_admin_password: "12345678!"
     jenkins_admin_password: "12345678!"
-  # 在執行其他任務前，先確保並安裝 Minikube
+
   pre_tasks:
     - name: Check if Minikube is installed
       stat:
@@ -41,29 +41,37 @@
     - name: Install APT dependencies
       apt:
         name:
-          # - apt-transport-https
-          # - ca-certificates
           - curl
-          # - gnupg
-          # - lsb-release
         state: present
         update_cache: yes
 
-    - name: Download kubectl binary
+    - name: Check if kubectl binary exists
+      stat:
+        path: /usr/local/bin/kubectl
+      register: kubectl_check
+      become: false
+
+    - name: Download kubectl binary if not present
       get_url:
         url: https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
         dest: /usr/local/bin/kubectl
         mode: '0755'
-      args:
-        creates: /usr/local/bin/kubectl
+        force: no
+      when: not kubectl_check.stat.exists
 
-    - name: Download Helm archive
+    - name: Check if Helm archive exists
+      stat:
+        path: /tmp/helm.tar.gz
+      register: helm_archive
+      become: false
+
+    - name: Download Helm archive if not present
       get_url:
         url: https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz
         dest: /tmp/helm.tar.gz
         mode: '0644'
-      args:
-        creates: /usr/local/bin/helm
+        force: no
+      when: not helm_archive.stat.exists
 
     - name: Extract Helm
       unarchive:
@@ -103,7 +111,6 @@
       args:
         creates: /usr/local/bin/argocd
 
-    # ArgoCD CLI 安裝、登入與修改密碼
     - name: Check if ArgoCD CLI is installed
       stat:
         path: /usr/local/bin/argocd
