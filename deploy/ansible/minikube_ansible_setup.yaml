@@ -5,7 +5,7 @@
   collections:
     - kubernetes.core
   vars:
-    kubeconfig_path: "{{ lookup('env','HOME') + '/.kube/config' }}"  # 自動偵測當前使用者的 kubeconfig
+    kubeconfig_path: "/home/{{ user_name }}/.kube/config"
     cluster_name: cluster1
     kubectl_version: v1.33.1
     helm_version: v3.18.2
