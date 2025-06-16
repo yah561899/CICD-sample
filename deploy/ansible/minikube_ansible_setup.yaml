@@ -5,6 +5,7 @@
   collections:
     - kubernetes.core
   vars:
+    kubeconfig_path: "{{ lookup('env','HOME') + '/.kube/config' }}"  # 自動偵測當前使用者的 kubeconfig
     cluster_name: cluster1
     kubectl_version: v1.33.1
     helm_version: v3.18.2
@@ -146,6 +147,7 @@
 
     - name: Create namespace for Jenkins
       kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
         api_version: v1
         kind: Namespace
         name: jenkins
@@ -153,6 +155,7 @@
 
     - name: Deploy Jenkins via Helm
       kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
         name: jenkins
         chart_ref: jenkins/jenkins
         namespace: jenkins
@@ -163,6 +166,7 @@
 
     - name: Create namespace for Nexus
       kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
         api_version: v1
         kind: Namespace
         name: nexus
@@ -170,6 +174,7 @@
 
     - name: Deploy Nexus Repository Manager via Helm
       kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
         name: nexus
         chart_ref: sonatype/nexus-repository-manager
         namespace: nexus
@@ -177,6 +182,7 @@
 
     - name: Create namespace for Redis
       kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
         api_version: v1
         kind: Namespace
         name: redis
@@ -184,6 +190,7 @@
 
     - name: Deploy Redis via Helm
       kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
         name: redis
         chart_ref: bitnami/redis
         namespace: redis
@@ -191,6 +198,7 @@
 
     - name: Create namespace for RabbitMQ
       kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
         api_version: v1
         kind: Namespace
         name: rabbitmq
@@ -198,6 +206,7 @@
 
     - name: Deploy RabbitMQ via Helm
       kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
         name: rabbitmq
         chart_ref: bitnami/rabbitmq
         namespace: rabbitmq
