@@ -141,6 +141,10 @@
       shell: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode
       register: argocd_initial_password
 
+    - name: Argocd admim password
+      debug:
+        msg: "Password: {{ argocd_initial_password }}, Password by stdout: {{ argocd_initial_password.stdout }}"
+
     - name: Login to ArgoCD using CLI
       shell: argocd login localhost:8080 --username admin --password {{ argocd_initial_password.stdout }} --insecure
       args:
