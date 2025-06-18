@@ -111,6 +111,13 @@
     - name: Update Helm repositories
       command: helm repo update
 
+    - name: Check if ArgoCD server is already installed
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment argocd-server -n argocd
+      register: argocd_server_status
+      ignore_errors: true
+      changed_when: false
+      become: false
+
     - name: Create namespace for ArgoCD
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -119,10 +126,10 @@
         name: argocd
         state: present
 
-    - name: Install ArgoCD server
+    - name: Install ArgoCD server if not present
       shell: kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-      args:
-        creates: /usr/local/bin/argocd
+      when: argocd_server_status.rc != 0
+      become: false
 
     - name: Check if ArgoCD CLI is installed
       stat:
@@ -137,24 +144,6 @@
         mode: '0755'
       when: not argocd_cli.stat.exists
 
-    - name: Retrieve initial ArgoCD admin password
-      shell: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode
-      register: argocd_initial_password
-
-    - name: Argocd admim password
-      debug:
-        msg: "Password: {{ argocd_initial_password }}, Password by stdout: {{ argocd_initial_password.stdout }}"
-
-    - name: Login to ArgoCD using CLI
-      shell: argocd login localhost:8080 --username admin --password {{ argocd_initial_password.stdout }} --insecure
-      args:
-        creates: /tmp/argocd_cli_login
-
-    - name: Change ArgoCD admin password
-      shell: argocd account update-password --current-password {{ argocd_initial_password.stdout }} --new-password {{ argocd_admin_password }}
-      args:
-        creates: /tmp/argocd_pass_changed
-
     - name: Create namespace for Jenkins
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -163,7 +152,14 @@
         name: jenkins
         state: present
 
-    - name: Deploy Jenkins via Helm
+    - name: Check if Jenkins is already deployed
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment jenkins -n jenkins
+      register: jenkins_status
+      ignore_errors: true
+      changed_when: false
+      become: false
+
+    - name: Deploy Jenkins via Helm if not present
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: jenkins
@@ -173,6 +169,7 @@
         values:
           controller:
             adminPassword: "{{ jenkins_admin_password }}"
+      when: jenkins_status.rc != 0
 
     - name: Create namespace for Nexus
       kubernetes.core.k8s:
@@ -182,13 +179,21 @@
         name: nexus
         state: present
 
-    - name: Deploy Nexus Repository Manager via Helm
+    - name: Check if Nexus is already deployed
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment nexus -n nexus
+      register: nexus_status
+      ignore_errors: true
+      changed_when: false
+      become: false
+
+    - name: Deploy Nexus Repository Manager via Helm if not present
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: nexus
         chart_ref: sonatype/nexus-repository-manager
         namespace: nexus
         create_namespace: false
+      when: nexus_status.rc != 0
 
     - name: Create namespace for Redis
       kubernetes.core.k8s:
@@ -198,13 +203,21 @@
         name: redis
         state: present
 
-    - name: Deploy Redis via Helm
+    - name: Check if Redis is already deployed
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset redis-master -n redis
+      register: redis_status
+      ignore_errors: true
+      changed_when: false
+      become: false
+
+    - name: Deploy Redis via Helm if not present
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: redis
         chart_ref: bitnami/redis
         namespace: redis
         create_namespace: false
+      when: redis_status.rc != 0
 
     - name: Create namespace for RabbitMQ
       kubernetes.core.k8s:
@@ -214,10 +227,18 @@
         name: rabbitmq
         state: present
 
-    - name: Deploy RabbitMQ via Helm
+    - name: Check if RabbitMQ is already deployed
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset rabbitmq -n rabbitmq
+      register: rabbitmq_status
+      ignore_errors: true
+      changed_when: false
+      become: false
+
+    - name: Deploy RabbitMQ via Helm if not present
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: rabbitmq
         chart_ref: bitnami/rabbitmq
         namespace: rabbitmq
         create_namespace: false
+      when: rabbitmq_status.rc != 0
