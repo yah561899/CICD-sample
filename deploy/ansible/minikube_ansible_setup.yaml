@@ -13,6 +13,17 @@
     helm_version: v3.18.2
 
   pre_tasks:
+    - name: Install pip3
+      apt:
+        name: python3-pip
+        state: present
+        update_cache: yes
+
+    - name: Install Kubernetes Python
+      pip:
+        name: kubernetes
+        executable: pip3
+        
     - name: Kubernetes Path
       debug:
         msg: "Kubernetes path: {{ kubeconfig_path }}"
@@ -38,7 +49,7 @@
       become: false
 
     - name: Start Minikube cluster if not running
-      command: minikube start -p {{ cluster_name }} --driver={{ minikube_driver }}
+      command: minikube start -p {{ cluster_name }} --driver={{ minikube_driver }} --force
       when: "'Running' not in minikube_status.stdout"
       become: false
 
