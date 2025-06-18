@@ -166,9 +166,6 @@
         chart_ref: jenkins/jenkins
         namespace: jenkins
         create_namespace: false
-        values:
-          controller:
-            adminPassword: "{{ jenkins_admin_password }}"
       when: jenkins_status.rc != 0
 
     - name: Create namespace for Nexus
