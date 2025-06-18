@@ -7,11 +7,10 @@
   vars:
     user_name: "{{ lookup('env','USER') }}"
     kubeconfig_path: "/home/{{ user_name }}/.kube/config"
+    minikube_driver: docker
     cluster_name: cluster1
     kubectl_version: v1.33.1
     helm_version: v3.18.2
-    argocd_admin_password: "12345678!"
-    jenkins_admin_password: "12345678!"
 
   pre_tasks:
     - name: Kubernetes Path
@@ -38,10 +37,10 @@
       changed_when: false
       become: false
 
-    # - name: Start Minikube cluster if not running
-    #   command: minikube start -p {{ cluster_name }} --driver=docker
-    #   when: "'Running' not in minikube_status.stdout"
-    #   become: false
+    - name: Start Minikube cluster if not running
+      command: minikube start -p {{ cluster_name }} --driver={{ minikube_driver }}
+      when: "'Running' not in minikube_status.stdout"
+      become: false
 
   tasks:
     - name: Install APT dependencies
