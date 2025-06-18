@@ -38,10 +38,10 @@
       changed_when: false
       become: false
 
-    - name: Start Minikube cluster if not running
-      command: minikube start -p {{ cluster_name }} --driver=docker
-      when: "'Running' not in minikube_status.stdout"
-      become: false
+    # - name: Start Minikube cluster if not running
+    #   command: minikube start -p {{ cluster_name }} --driver=docker
+    #   when: "'Running' not in minikube_status.stdout"
+    #   become: false
 
   tasks:
     - name: Install APT dependencies
