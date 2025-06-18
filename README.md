@@ -45,6 +45,8 @@ Before you begin, ensure you have:
 
 3. **Enable Docker group access**
 
+> **Note:** **$USER** is your current username.
+
    ```bash
    sudo usermod -aG docker $USER
    newgrp docker
