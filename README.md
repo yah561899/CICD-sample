@@ -8,7 +8,7 @@ This guide walks you through preparing a Linux host to run Minikube using the Do
 
 Before you begin, ensure you have:
 
-* **Operating System:** Ubuntu 18.04+ (or Debian-based)
+* **Operating System:** Ubuntu 24.04 (or Debian-based)
 * **User Permissions:** Ability to install packages and add users to groups
 * **Internet Access:** To download packages and container images
 
