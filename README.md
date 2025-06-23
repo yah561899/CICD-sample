@@ -85,12 +85,12 @@ This provides the `pip3` command used to install Python-based tooling.
 
 ### 5.1 Prepare Playbook
 
-Ensure you have an Ansible playbook named `infrastructure_setup.yaml` in your working directory.
+Ensure you have an Ansible playbook named `infrastructure-setup.yaml` in your working directory.
 
 ### 5.2 Run Playbook (Docker Driver)
 
 ```bash
-ansible-playbook -c local -K infrastructure_setup.yaml \
+ansible-playbook -c local -K infrastructure-setup.yaml \
   -e "minikube_driver=docker"
 ```
 

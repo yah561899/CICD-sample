@@ -17,6 +17,10 @@
       private: yes
 
   pre_tasks:
+    - name: Cluster Name
+      debug:
+        msg: "Cluster name: {{ cluster_name }}"
+
     - name: Kubernetes Path
       debug:
         msg: "Kubernetes path: {{ kubeconfig_path }}"
