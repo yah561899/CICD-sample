@@ -25,6 +25,13 @@
       debug:
         msg: "Kubernetes path: {{ kubeconfig_path }}"
 
+    - name: Install python3-kubernetes
+      apt:
+        name:
+          - python3-kubernetes
+        state: present
+        update_cache: yes
+
     - name: Check if Minikube is installed
       stat:
         path: /usr/local/bin/minikube
