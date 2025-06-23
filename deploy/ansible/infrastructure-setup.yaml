@@ -17,17 +17,6 @@
       private: yes
 
   pre_tasks:
-    - name: Install pip3
-      apt:
-        name: python3-pip
-        state: present
-        update_cache: yes
-
-    - name: Install Kubernetes Python
-      pip:
-        name: kubernetes
-        executable: pip3
-        
     - name: Kubernetes Path
       debug:
         msg: "Kubernetes path: {{ kubeconfig_path }}"
