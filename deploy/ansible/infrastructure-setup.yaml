@@ -8,9 +8,13 @@
     user_name: "{{ lookup('env','USER') }}"
     kubeconfig_path: "/home/{{ user_name }}/.kube/config"
     minikube_driver: docker
-    cluster_name: cluster1
     kubectl_version: v1.33.1
     helm_version: v3.18.2
+
+  vars_prompt:
+    - name: cluster_name
+      prompt: "Enter your targeted cluster name"
+      private: yes
 
   pre_tasks:
     - name: Install pip3
