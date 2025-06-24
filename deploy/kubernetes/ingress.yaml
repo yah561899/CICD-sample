@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: nginx                    # ← 指定要使用的 IngressClass
   rules:
-  - host:
+  - host: myapp.local
     http:
       paths:
       - path: /argocd(/|$)(.*)
