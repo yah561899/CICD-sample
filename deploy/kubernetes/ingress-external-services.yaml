@@ -1,0 +1,45 @@
+# external-services.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-server
+  namespace: ingress-nginx
+spec:
+  type: ExternalName
+  externalName: argocd-server.argocd.svc.cluster.local
+  ports:
+    - port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: ingress-nginx
+spec:
+  type: ExternalName
+  externalName: jenkins.jenkins.svc.cluster.local
+  ports:
+    - port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus
+  namespace: ingress-nginx
+spec:
+  type: ExternalName
+  externalName: nexus-nexus-repository-manager.nexus.svc.cluster.local
+  ports:
+    - port: 8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-management
+  namespace: ingress-nginx
+spec:
+  type: ExternalName
+  externalName: rabbitmq.rabbitmq.svc.cluster.local
+  ports:
+    - port: 15672
