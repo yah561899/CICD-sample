@@ -14,7 +14,7 @@
   vars_prompt:
     - name: cluster_name
       prompt: "Enter your targeted cluster name"
-      private: yes
+      private: false
 
   pre_tasks:
     - name: Cluster Name
