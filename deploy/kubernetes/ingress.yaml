@@ -8,7 +8,6 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx                    # ← 指定要使用的 IngressClass
-  type: LoadBalancer
   rules:
   - host: myapp.local
     http:
