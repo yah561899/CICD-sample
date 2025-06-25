@@ -180,7 +180,6 @@
     - name: Deploy Jenkins via Helm if not present
       vars:
         jenkins_username: admin
-        all_tools_password: 12345678!
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: jenkins
@@ -189,7 +188,7 @@
         create_namespace: false
         set_values:
           - "controller.adminUser={{ jenkins_username }}"
-          - "controller.adminPassword={{ all_tools_password }}"
+          - "controller.adminPassword=\"{{ all_tools_password }}\""
       when: jenkins_status.rc != 0
 
     - name: Create namespace for Nexus
