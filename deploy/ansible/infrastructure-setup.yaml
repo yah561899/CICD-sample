@@ -184,10 +184,8 @@
         chart_ref: jenkins/jenkins
         namespace: jenkins
         create_namespace: false
-        set:
-          # 指定初始登录用户名（默认为 admin）
+        set_values:
           controller.adminUser: "{{ jenkins_username | default('admin') }}"
-          # 指定初始登录密码
           controller.adminPassword: "{{ all_tools_password }}"
       when: jenkins_status.rc != 0
 
@@ -213,11 +211,9 @@
         chart_ref: sonatype/nexus-repository-manager
         namespace: nexus
         create_namespace: false
-        set:
-          # 设置初始 admin 密码
+        set_values:
           nexus.env[0].name: NEXUS_SECURITY_INITIAL_PASSWORD
           nexus.env[0].value: "{{ all_tools_password }}"
-          # 禁用随机密码生成
           nexus.env[1].name: NEXUS_SECURITY_RANDOMPASSWORD
           nexus.env[1].value: "false"
       when: nexus_status.rc != 0
@@ -244,7 +240,7 @@
         chart_ref: bitnami/redis
         namespace: redis
         create_namespace: false
-        set:
+        set_values:
           auth.password: "{{ all_tools_password }}"
       when: redis_status.rc != 0
 
@@ -270,7 +266,7 @@
         chart_ref: bitnami/rabbitmq
         namespace: rabbitmq
         create_namespace: false
-        set:
+        set_values:
           auth.password: "{{ all_tools_password }}"
           updatePassword: true
       when: rabbitmq_status.rc != 0
