@@ -125,27 +125,3 @@ If you prefer VirtualBox or Podman, uncomment and run one of the following comma
 ---
 
 *Last updated: 2025-06-18*
-
-# Change Admin Password From each Tool
-
-## Start Minikube tunnel and update admin passwords for Argocd, Jenkins, Redis, and RabbitMQ
-
-### 5.1 Prepare Playbook
-
-Ensure you have an Ansible playbook named `change-passwords.yaml` in your working directory.
-
-### 5.2 Run Playbook (Docker Driver)
-
-```bash
-ansible-playbook -c local change-passwords.yaml
-```
-
-* `-c local`: Execute on the local host
-
-## Nexus
-
-Open the Nexus website and signed in by admin
-
-   ```bash
-   kubectl -n nexus exec -it <nexus-pod-name> -- cat /nexus-data/admin.password
-   ```

@@ -4,6 +4,7 @@
   become: yes
   collections:
     - kubernetes.core
+
   vars:
     user_name: "{{ lookup('env','USER') }}"
     kubeconfig_path: "/home/{{ user_name }}/.kube/config"
@@ -15,7 +16,7 @@
     - name: cluster_name
       prompt: "Enter your targeted cluster name"
       private: false
-    
+
     - name: all_tools_password
       prompt: "Enter new all tools admin password"
       private: false
@@ -31,8 +32,7 @@
 
     - name: Install python3-kubernetes
       apt:
-        name:
-          - python3-kubernetes
+        name: python3-kubernetes
         state: present
         update_cache: yes
 
@@ -64,8 +64,7 @@
   tasks:
     - name: Install APT dependencies
       apt:
-        name:
-          - curl
+        name: curl
         state: present
         update_cache: yes
 
@@ -123,13 +122,17 @@
         helm repo add bitnami https://charts.bitnami.com/bitnami
         helm repo add jenkins https://charts.jenkins.io
         helm repo add sonatype https://sonatype.github.io/helm3-charts
+        helm repo add argo https://argoproj.github.io/argo-helm
       args:
         creates: ~/.cache/helm/repository/repositories.yaml
 
     - name: Update Helm repositories
       command: helm repo update
 
-    - name: Check if ArgoCD server is already installed
+    # ----------------------------
+    # ArgoCD
+    # ----------------------------
+    - name: Check if ArgoCD server is already deployed
       command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment argocd-server -n argocd
       register: argocd_server_status
       ignore_errors: true
@@ -144,10 +147,19 @@
         name: argocd
         state: present
 
-    - name: Install ArgoCD server if not present
-      shell: kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    - name: Deploy ArgoCD via Helm if not present
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
+        name: argocd
+        chart_ref: argo/argo-cd
+        namespace: argocd
+        create_namespace: false
+        values:
+          configs:
+            secret:
+              argocdServerAdmin:
+                password: "{{ all_tools_password }}"
       when: argocd_server_status.rc != 0
-      become: false
 
     - name: Check if ArgoCD CLI is installed
       stat:
@@ -162,6 +174,9 @@
         mode: '0755'
       when: not argocd_cli.stat.exists
 
+    # ----------------------------
+    # Jenkins
+    # ----------------------------
     - name: Create namespace for Jenkins
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -193,6 +208,9 @@
               password: "{{ all_tools_password }}"
       when: jenkins_status.rc != 0
 
+    # ----------------------------
+    # Nexus
+    # ----------------------------
     - name: Create namespace for Nexus
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -224,6 +242,9 @@
                 value: "false"
       when: nexus_status.rc != 0
 
+    # ----------------------------
+    # Redis
+    # ----------------------------
     - name: Create namespace for Redis
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -251,6 +272,9 @@
             password: "{{ all_tools_password }}"
       when: redis_status.rc != 0
 
+    # ----------------------------
+    # RabbitMQ
+    # ----------------------------
     - name: Create namespace for RabbitMQ
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -267,6 +291,8 @@
       become: false
 
     - name: Deploy RabbitMQ via Helm if not present
+      vars:
+        rabbitmq_username: admin
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: rabbitmq
@@ -275,6 +301,7 @@
         create_namespace: false
         values:
           auth:
+            username: "{{ rabbitmq_username }}"
             password: "{{ all_tools_password }}"
           updatePassword: true
       when: rabbitmq_status.rc != 0
