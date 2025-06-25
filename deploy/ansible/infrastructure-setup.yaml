@@ -18,7 +18,7 @@
     
     - name: all_tools_password
       prompt: "Enter new all tools admin password"
-      private: yes
+      private: false
 
   pre_tasks:
     - name: Cluster Name
@@ -180,6 +180,7 @@
     - name: Deploy Jenkins via Helm if not present
       vars:
         jenkins_username: admin
+        all_tools_password: 12345678!
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: jenkins
