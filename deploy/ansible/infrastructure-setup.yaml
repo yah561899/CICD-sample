@@ -215,11 +215,12 @@
         chart_ref: sonatype/nexus-repository-manager
         namespace: nexus
         create_namespace: false
-        set_values:
-          - nexus.env[0].name: NEXUS_SECURITY_INITIAL_PASSWORD
-          - nexus.env[0].value: "{{ all_tools_password }}"
-          - nexus.env[1].name: NEXUS_SECURITY_RANDOMPASSWORD
-          - nexus.env[1].value: "false"
+        nexus:
+          env:
+            - name: NEXUS_SECURITY_INITIAL_PASSWORD
+              value: "{{ all_tools_password }}"
+            - name: NEXUS_SECURITY_RANDOMPASSWORD
+              value: "false"
       when: nexus_status.rc != 0
 
     - name: Create namespace for Redis
@@ -244,8 +245,9 @@
         chart_ref: bitnami/redis
         namespace: redis
         create_namespace: false
-        set_values:
-          - auth.password: "{{ all_tools_password }}"
+        values:
+          auth:
+            password: "{{ all_tools_password }}"
       when: redis_status.rc != 0
 
     - name: Create namespace for RabbitMQ
@@ -270,7 +272,8 @@
         chart_ref: bitnami/rabbitmq
         namespace: rabbitmq
         create_namespace: false
-        set_values:
-          - auth.password: "{{ all_tools_password }}"
-          - updatePassword: true
+        values:
+          auth:
+            password: "{{ all_tools_password }}"
+          updatePassword: true
       when: rabbitmq_status.rc != 0
