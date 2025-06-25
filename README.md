@@ -125,3 +125,13 @@ If you prefer VirtualBox or Podman, uncomment and run one of the following comma
 ---
 
 *Last updated: 2025-06-18*
+
+# Change Admin Password From each Tool
+
+## Nexus
+
+Open the Nexus website and signed in by admin
+
+   ```bash
+   kubectl -n nexus exec -it <nexus-pod-name> -- cat /nexus-data/admin.password
+   ```
