@@ -188,8 +188,9 @@
         create_namespace: false
         values:
           controller:
-            adminUser: "{{ jenkins_username }}"
-            adminPassword: "{{ all_tools_password }}"
+            admin:
+              username: "{{ jenkins_username }}"
+              password: "{{ all_tools_password }}"
       when: jenkins_status.rc != 0
 
     - name: Create namespace for Nexus
