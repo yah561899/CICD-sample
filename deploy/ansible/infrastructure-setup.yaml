@@ -215,12 +215,13 @@
         chart_ref: sonatype/nexus-repository-manager
         namespace: nexus
         create_namespace: false
-        nexus:
-          env:
-            - name: NEXUS_SECURITY_INITIAL_PASSWORD
-              value: "{{ all_tools_password }}"
-            - name: NEXUS_SECURITY_RANDOMPASSWORD
-              value: "false"
+        values:
+          nexus:
+            env:
+              - name: NEXUS_SECURITY_INITIAL_PASSWORD
+                value: "{{ all_tools_password }}"
+              - name: NEXUS_SECURITY_RANDOMPASSWORD
+                value: "false"
       when: nexus_status.rc != 0
 
     - name: Create namespace for Redis
