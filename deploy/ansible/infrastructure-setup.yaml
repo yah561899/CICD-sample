@@ -187,7 +187,7 @@
         namespace: jenkins
         create_namespace: false
         set_values:
-          - "controller.adminUser={{ jenkins_username }}"
+          - "controller.adminUser=admin"
           - "controller.adminPassword=\"{{ all_tools_password }}\""
       when: jenkins_status.rc != 0
 
