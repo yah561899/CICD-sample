@@ -15,6 +15,10 @@
     - name: cluster_name
       prompt: "Enter your targeted cluster name"
       private: false
+    
+    - name: all_tools_password
+      prompt: "Enter new all tools admin password"
+      private: yes
 
   pre_tasks:
     - name: Cluster Name
@@ -180,6 +184,11 @@
         chart_ref: jenkins/jenkins
         namespace: jenkins
         create_namespace: false
+        set:
+          # 指定初始登录用户名（默认为 admin）
+          controller.adminUser: "{{ jenkins_username | default('admin') }}"
+          # 指定初始登录密码
+          controller.adminPassword: "{{ all_tools_password }}"
       when: jenkins_status.rc != 0
 
     - name: Create namespace for Nexus
@@ -204,6 +213,13 @@
         chart_ref: sonatype/nexus-repository-manager
         namespace: nexus
         create_namespace: false
+        set:
+          # 设置初始 admin 密码
+          nexus.env[0].name: NEXUS_SECURITY_INITIAL_PASSWORD
+          nexus.env[0].value: "{{ all_tools_password }}"
+          # 禁用随机密码生成
+          nexus.env[1].name: NEXUS_SECURITY_RANDOMPASSWORD
+          nexus.env[1].value: "false"
       when: nexus_status.rc != 0
 
     - name: Create namespace for Redis
@@ -228,6 +244,8 @@
         chart_ref: bitnami/redis
         namespace: redis
         create_namespace: false
+        set:
+          auth.password: "{{ all_tools_password }}"
       when: redis_status.rc != 0
 
     - name: Create namespace for RabbitMQ
@@ -252,4 +270,7 @@
         chart_ref: bitnami/rabbitmq
         namespace: rabbitmq
         create_namespace: false
+        set:
+          auth.password: "{{ all_tools_password }}"
+          updatePassword: true
       when: rabbitmq_status.rc != 0
