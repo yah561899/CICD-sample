@@ -154,14 +154,12 @@
         chart_ref: argo/argo-cd
         namespace: argocd
         create_namespace: false
-      register: argocd_server
       when: argocd_server_status.rc != 0
 
     - name: Generate bcrypt hash for ArgoCD admin password
       shell: argocd account bcrypt --password "{{ all_tools_password }}"
       register: argocd_bcrypt
       changed_when: false
-      when: argocd_server.rc != 0
     
     - name: Patch ArgoCD secret with new admin credentials
       shell: >
