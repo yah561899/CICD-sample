@@ -157,17 +157,26 @@
       when: argocd_server_status.rc != 0
 
     - name: Generate bcrypt hash for ArgoCD admin password
-      shell: argocd account bcrypt --password "{{ all_tools_password }}"
+      shell: >
+        argocd account bcrypt --password "{{ all_tools_password }}"
       register: argocd_bcrypt
       changed_when: false
-    
+
     - name: Patch ArgoCD secret with new admin credentials
       shell: >
-        kubectl -n argocd patch secret argocd-secret --type=merge
-        -p '{{ {"stringData": {
-               "admin.password": argocd_bcrypt.stdout,
-               "admin.passwordMTime": ansible_date_time.iso8601
-             }} | to_json }}'
+        kubectl --kubeconfig={{ kubeconfig_path }} -n argocd patch secret argocd-secret --type=merge
+        -p '{{ {
+            "stringData": {
+              "admin.password": argocd_bcrypt.stdout,
+              "admin.passwordMTime": ansible_date_time.iso8601
+            }
+          } | to_json }}'
+      args:
+        executable: /bin/bash
+      retries: 5
+      delay: 10
+      register: patch_result
+      until: patch_result.rc == 0
 
     - name: Check if ArgoCD CLI is installed
       stat:
