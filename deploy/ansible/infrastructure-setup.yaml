@@ -177,7 +177,7 @@
 
     - name: Patch ArgoCD secret with new admin credentials
       shell: >
-        kubectl --kubeconfig={{ kubeconfig_path }} -n argocd patch secret argocd-secret --type=merge
+        kubectl --kubeconfig={{ kubeconfig_path }} -n devops patch secret argocd-secret --type=merge
         -p '{{ {
             "stringData": {
               "admin.password": argocd_bcrypt.stdout,
