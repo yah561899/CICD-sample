@@ -167,6 +167,10 @@
         chart_ref: argo/argo-cd
         namespace: argocd
         create_namespace: false
+        values:
+          configs:
+            secret:
+              createSecret: false
       when: argocd_server_status.rc != 0
 
     - name: Check if ArgoCD CLI is installed
