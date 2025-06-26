@@ -154,7 +154,7 @@
         chart_ref: argo/argo-cd
         namespace: argocd
         create_namespace: false
-        register: argocd_server
+      register: argocd_server
       when: argocd_server_status.rc != 0
 
     - name: Generate bcrypt hash for ArgoCD admin password
