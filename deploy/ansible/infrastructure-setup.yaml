@@ -146,19 +146,6 @@
         kind: Namespace
         name: argocd
         state: present
-    
-    - name: Pre-create ArgoCD initial admin Secret
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: argocd-initial-admin-secret
-            namespace: argocd
-          stringData:
-            password: "{{ all_tools_password }}"
 
     - name: Deploy ArgoCD via Helm if not present
       kubernetes.core.helm:
@@ -167,11 +154,22 @@
         chart_ref: argo/argo-cd
         namespace: argocd
         create_namespace: false
-        values:
-          configs:
-            secret:
-              createSecret: true
+        register: argocd_server
       when: argocd_server_status.rc != 0
+
+    - name: Generate bcrypt hash for ArgoCD admin password
+      shell: argocd account bcrypt --password "{{ all_tools_password }}"
+      register: argocd_bcrypt
+      changed_when: false
+      when: argocd_server.rc != 0
+    
+    - name: Patch ArgoCD secret with new admin credentials
+      shell: >
+        kubectl -n argocd patch secret argocd-secret --type=merge
+        -p '{{ {"stringData": {
+               "admin.password": argocd_bcrypt.stdout,
+               "admin.passwordMTime": ansible_date_time.iso8601
+             }} | to_json }}'
 
     - name: Check if ArgoCD CLI is installed
       stat:
