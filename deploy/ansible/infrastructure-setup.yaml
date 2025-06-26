@@ -170,7 +170,7 @@
         values:
           configs:
             secret:
-              createSecret: false
+              createSecret: true
       when: argocd_server_status.rc != 0
 
     - name: Check if ArgoCD CLI is installed
