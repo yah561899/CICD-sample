@@ -165,7 +165,7 @@
         kubeconfig: "{{ kubeconfig_path }}"
         name: argocd
         chart_ref: argo/argo-cd
-        namespace: argocd
+        namespace: devops
         create_namespace: false
       register: argocd_server
       when: argocd_server_status.rc != 0
@@ -200,14 +200,6 @@
     # ----------------------------
     # Jenkins
     # ----------------------------
-    - name: Create namespace for Jenkins
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        api_version: v1
-        kind: Namespace
-        name: jenkins
-        state: present
-
     - name: Check if Jenkins is already deployed
       command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment jenkins -n devops
       register: jenkins_status
@@ -222,7 +214,7 @@
         kubeconfig: "{{ kubeconfig_path }}"
         name: jenkins
         chart_ref: jenkins/jenkins
-        namespace: jenkins
+        namespace: devops
         create_namespace: false
         values:
           controller:
@@ -246,7 +238,7 @@
         kubeconfig: "{{ kubeconfig_path }}"
         name: nexus
         chart_ref: sonatype/nexus-repository-manager
-        namespace: nexus
+        namespace: devops
         create_namespace: false
         values:
           nexus:
@@ -272,7 +264,7 @@
         kubeconfig: "{{ kubeconfig_path }}"
         name: redis
         chart_ref: bitnami/redis
-        namespace: redis
+        namespace: "{{ service_namespace }}"
         create_namespace: false
         values:
           auth:
@@ -296,7 +288,7 @@
         kubeconfig: "{{ kubeconfig_path }}"
         name: rabbitmq
         chart_ref: bitnami/rabbitmq
-        namespace: rabbitmq
+        namespace: "{{ service_namespace }}"
         create_namespace: false
         values:
           auth:
