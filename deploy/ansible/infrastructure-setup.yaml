@@ -17,6 +17,10 @@
       prompt: "Enter your targeted cluster name"
       private: false
 
+    - name: service_namespace
+      prompt: "Enter your targeted service namespace"
+      private: false
+
     - name: all_tools_password
       prompt: "Enter new all tools admin password"
       private: false
@@ -129,23 +133,32 @@
     - name: Update Helm repositories
       command: helm repo update
 
-    # ----------------------------
-    # ArgoCD
-    # ----------------------------
-    - name: Check if ArgoCD server is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment argocd-server -n argocd
-      register: argocd_server_status
-      ignore_errors: true
-      changed_when: false
-      become: false
-
-    - name: Create namespace for ArgoCD
+    - name: Create namespace for DevOps
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         api_version: v1
         kind: Namespace
-        name: argocd
+        name: devops
         state: present
+
+    - name: Create namespace for services
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        api_version: v1
+        kind: Namespace
+        name: "{{ service_namespace }}"
+        state: present
+
+
+    # ----------------------------
+    # ArgoCD
+    # ----------------------------
+    - name: Check if ArgoCD server is already deployed
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment argocd-server -n devops
+      register: argocd_server_status
+      ignore_errors: true
+      changed_when: false
+      become: false
 
     - name: Deploy ArgoCD via Helm if not present
       kubernetes.core.helm:
@@ -154,29 +167,22 @@
         chart_ref: argo/argo-cd
         namespace: argocd
         create_namespace: false
+      register: argocd_server
       when: argocd_server_status.rc != 0
 
     - name: Generate bcrypt hash for ArgoCD admin password
-      shell: >
-        argocd account bcrypt --password "{{ all_tools_password }}"
+      shell: argocd account bcrypt --password "{{ all_tools_password }}"
       register: argocd_bcrypt
       changed_when: false
-
+      when: argocd_server.rc != 0
+    
     - name: Patch ArgoCD secret with new admin credentials
       shell: >
-        kubectl --kubeconfig={{ kubeconfig_path }} -n argocd patch secret argocd-secret --type=merge
-        -p '{{ {
-            "stringData": {
-              "admin.password": argocd_bcrypt.stdout,
-              "admin.passwordMTime": ansible_date_time.iso8601
-            }
-          } | to_json }}'
-      args:
-        executable: /bin/bash
-      retries: 5
-      delay: 10
-      register: patch_result
-      until: patch_result.rc == 0
+        kubectl -n argocd patch secret argocd-secret --type=merge
+        -p '{{ {"stringData": {
+               "admin.password": argocd_bcrypt.stdout,
+               "admin.passwordMTime": ansible_date_time.iso8601
+             }} | to_json }}'
 
     - name: Check if ArgoCD CLI is installed
       stat:
@@ -203,7 +209,7 @@
         state: present
 
     - name: Check if Jenkins is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment jenkins -n jenkins
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment jenkins -n devops
       register: jenkins_status
       ignore_errors: true
       changed_when: false
@@ -228,16 +234,8 @@
     # ----------------------------
     # Nexus
     # ----------------------------
-    - name: Create namespace for Nexus
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        api_version: v1
-        kind: Namespace
-        name: nexus
-        state: present
-
     - name: Check if Nexus is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment nexus -n nexus
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment nexus -n devops
       register: nexus_status
       ignore_errors: true
       changed_when: false
@@ -262,16 +260,8 @@
     # ----------------------------
     # Redis
     # ----------------------------
-    - name: Create namespace for Redis
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        api_version: v1
-        kind: Namespace
-        name: redis
-        state: present
-
     - name: Check if Redis is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset redis-master -n redis
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset redis-master -n {{ service_namespace }}
       register: redis_status
       ignore_errors: true
       changed_when: false
@@ -292,16 +282,8 @@
     # ----------------------------
     # RabbitMQ
     # ----------------------------
-    - name: Create namespace for RabbitMQ
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        api_version: v1
-        kind: Namespace
-        name: rabbitmq
-        state: present
-
     - name: Check if RabbitMQ is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset rabbitmq -n rabbitmq
+      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset rabbitmq -n {{ service_namespace }}
       register: rabbitmq_status
       ignore_errors: true
       changed_when: false
