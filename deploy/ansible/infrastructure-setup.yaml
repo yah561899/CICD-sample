@@ -146,6 +146,19 @@
         kind: Namespace
         name: argocd
         state: present
+    
+    - name: Pre-create ArgoCD initial admin Secret
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: argocd-initial-admin-secret
+            namespace: argocd
+          stringData:
+            password: "{{ all_tools_password }}"
 
     - name: Deploy ArgoCD via Helm if not present
       kubernetes.core.helm:
@@ -154,11 +167,6 @@
         chart_ref: argo/argo-cd
         namespace: argocd
         create_namespace: false
-        values:
-          configs:
-            secret:
-              argocdServerAdmin:
-                password: "{{ all_tools_password }}"
       when: argocd_server_status.rc != 0
 
     - name: Check if ArgoCD CLI is installed
