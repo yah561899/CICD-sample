@@ -34,9 +34,12 @@
       debug:
         msg: "Kubernetes path: {{ kubeconfig_path }}"
 
-    - name: Install python3-kubernetes
+    - name: Install APT dependencies
       apt:
-        name: python3-kubernetes
+        name: 
+          - curl
+          - python3-kubernetes
+          - postgresql-client
         state: present
         update_cache: yes
 
@@ -66,12 +69,6 @@
       become: false
 
   tasks:
-    - name: Install APT dependencies
-      apt:
-        name: curl
-        state: present
-        update_cache: yes
-
     - name: Check if kubectl binary exists
       stat:
         path: /usr/local/bin/kubectl
@@ -167,6 +164,10 @@
         chart_ref: argo/argo-cd
         namespace: devops
         create_namespace: false
+        values:
+          server:
+            service:
+              type: LoadBalancer
       when: argocd_server_status.rc != 0
 
     - name: Generate bcrypt hash for ArgoCD admin password
@@ -228,6 +229,8 @@
             admin:
               username: "{{ jenkins_username }}"
               password: "{{ all_tools_password }}"
+            service:
+              type: LoadBalancer
       when: jenkins_status.rc != 0
 
     # ----------------------------
@@ -248,6 +251,8 @@
         namespace: devops
         create_namespace: false
         values:
+          service:
+            type: LoadBalancer
           nexus:
             env:
               - name: NEXUS_SECURITY_INITIAL_PASSWORD
@@ -276,6 +281,8 @@
         values:
           auth:
             password: "{{ all_tools_password }}"
+          service:
+            type: LoadBalancer
       when: redis_status.rc != 0
 
     # ----------------------------
@@ -302,4 +309,6 @@
             username: "{{ rabbitmq_username }}"
             password: "{{ all_tools_password }}"
           updatePassword: true
+          service:
+            type: LoadBalancer
       when: rabbitmq_status.rc != 0
