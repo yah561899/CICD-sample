@@ -149,7 +149,9 @@
     # ArgoCD
     # ----------------------------
     - name: Check if ArgoCD server is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment -n devops | grep argocd
+      shell: |
+        kubectl --kubeconfig={{ kubeconfig_path }} \
+        get deployment -n devops | grep argocd
       register: argocd_server_status
       ignore_errors: true
       changed_when: false
@@ -207,7 +209,9 @@
     # Jenkins
     # ----------------------------
     - name: Check if Jenkins is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset -n devops | grep jenkins
+      shell: |
+        kubectl --kubeconfig={{ kubeconfig_path }} \
+        get statefulset -n devops | grep jenkins
       register: jenkins_status
       ignore_errors: true
       changed_when: false
@@ -235,7 +239,9 @@
     # Nexus
     # ----------------------------
     - name: Check if Nexus is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get deployment -n devops | grep nexus
+      shell: |
+        kubectl --kubeconfig={{ kubeconfig_path }} \
+        get deployment -n devops | grep nexus
       register: nexus_status
       ignore_errors: true
       changed_when: false
@@ -263,7 +269,9 @@
     # Redis
     # ----------------------------
     - name: Check if Redis is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset -n {{ service_namespace }} | grep redis
+      shell: |
+        kubectl --kubeconfig={{ kubeconfig_path }} \
+        get statefulset -n {{ service_namespace }} | grep redis
       register: redis_status
       ignore_errors: true
       changed_when: false
@@ -287,7 +295,9 @@
     # RabbitMQ
     # ----------------------------
     - name: Check if RabbitMQ is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset -n {{ service_namespace }} | grep rabbitmq
+      shell: |
+        kubectl --kubeconfig={{ kubeconfig_path }} \
+        get statefulset -n {{ service_namespace }} | grep rabbitmq
       register: rabbitmq_status
       ignore_errors: true
       changed_when: false
@@ -315,7 +325,9 @@
     # PostgreSQL
     # ----------------------------
     - name: Check if PostgreSQL is already deployed
-      command: kubectl --kubeconfig={{ kubeconfig_path }} get statefulset -n {{ service_namespace }} | grep postgresql
+      shell: |
+        kubectl --kubeconfig={{ kubeconfig_path }} \
+        get statefulset -n {{ service_namespace }} | grep postgresql
       register: postgresql_status
       ignore_errors: true
       changed_when: false
