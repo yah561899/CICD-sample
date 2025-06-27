@@ -35,7 +35,7 @@
 
     - name: Install APT dependencies
       apt:
-        name: 
+        name:
           - curl
           - python3-kubernetes
           - postgresql-client
@@ -287,8 +287,12 @@
         values:
           auth:
             password: "{{ all_tools_password }}"
-          service:
-            type: LoadBalancer
+          master:
+            service:
+              type: LoadBalancer
+          replica:
+            service:
+              type: LoadBalancer
       when: redis_status.rc != 0
 
     # ----------------------------
@@ -338,11 +342,12 @@
         kubeconfig: "{{ kubeconfig_path }}"
         name: postgresql
         chart_ref: bitnami/postgresql
-        namespace: myapp
+        namespace: "{{ service_namespace }}"
         create_namespace: false
         values:
           auth:
             postgresPassword: "{{ all_tools_password }}"
-          service:
-            type: LoadBalancer
+          primary:
+            service:
+              type: LoadBalancer
       when: postgresql_status.rc != 0
