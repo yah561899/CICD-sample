@@ -24,6 +24,10 @@
       prompt: "Enter new all tools admin password"
       private: false
 
+    - name: use_loadbalancer
+      prompt: "Use LoadBalancer for services? (Y/N)"
+      private: false
+
   pre_tasks:
     - name: Cluster Name
       debug:
@@ -167,7 +171,7 @@
         values:
           server:
             service:
-              type: LoadBalancer
+              type: "{{ 'LoadBalancer' if use_loadbalancer | lower == 'y' else 'ClusterIP' }}"
       when: argocd_server_status.rc != 0
 
     - name: Generate bcrypt hash for ArgoCD admin password
@@ -231,7 +235,7 @@
             admin:
               username: "{{ jenkins_username }}"
               password: "{{ all_tools_password }}"
-            serviceType: LoadBalancer
+            serviceType: "{{ 'LoadBalancer' if use_loadbalancer | lower == 'y' else 'ClusterIP' }}"
       when: jenkins_status.rc != 0
 
     # ----------------------------
@@ -255,7 +259,7 @@
         create_namespace: false
         values:
           service:
-            type: LoadBalancer
+            type: "{{ 'LoadBalancer' if use_loadbalancer | lower == 'y' else 'ClusterIP' }}"
           nexus:
             env:
               - name: NEXUS_SECURITY_INITIAL_PASSWORD
@@ -288,10 +292,10 @@
             password: "{{ all_tools_password }}"
           master:
             service:
-              type: LoadBalancer
+              type: "{{ 'LoadBalancer' if use_loadbalancer | lower == 'y' else 'ClusterIP' }}"
           replica:
             service:
-              type: LoadBalancer
+              type: "{{ 'LoadBalancer' if use_loadbalancer | lower == 'y' else 'ClusterIP' }}"
       when: redis_status.rc != 0
 
     # ----------------------------
@@ -321,7 +325,7 @@
             password: "{{ all_tools_password }}"
           updatePassword: true
           service:
-            type: LoadBalancer
+            type: "{{ 'LoadBalancer' if use_loadbalancer | lower == 'y' else 'ClusterIP' }}"
       when: rabbitmq_status.rc != 0
 
     # ----------------------------
@@ -348,5 +352,5 @@
             postgresPassword: "{{ all_tools_password }}"
           primary:
             service:
-              type: LoadBalancer
+              type: "{{ 'LoadBalancer' if use_loadbalancer | lower == 'y' else 'ClusterIP' }}"
       when: postgresql_status.rc != 0
