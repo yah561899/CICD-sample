@@ -16,14 +16,15 @@ Before you begin, ensure you have:
 
 ## 🏗️ 1. Infrastructure Components
 
-| Component    | Purpose                                            |
-| ------------ | -------------------------------------------------- |
-| `kubectl`    | CLI for Kubernetes cluster management              |
-| `helm`       | Kubernetes package manager                         |
-| **Argo CD**  | Continuous delivery tool for GitOps workflows      |
-| **Nexus**    | Artifact repository for Docker images, Helm charts |
-| **Redis**    | In-memory data store (caching, pub/sub)            |
-| **RabbitMQ** | Message broker for microservices                   |
+| Component       | Purpose                                            |
+| --------------- | -------------------------------------------------- |
+| `kubectl`       | CLI for Kubernetes cluster management              |
+| `helm`          | Kubernetes package manager                         |
+| **Argo CD**     | Continuous delivery tool for GitOps workflows      |
+| **Nexus**       | Artifact repository for Docker images, Helm charts |
+| **Redis**       | In-memory data store (caching, pub/sub)            |
+| **RabbitMQ**    | Message broker for microservices                   |
+| **PostgreSQL**  | SQL databases                                      |
 
 > **Tip:** Add brief descriptions to each component to clarify roles for new team members.
 

@@ -231,8 +231,7 @@
             admin:
               username: "{{ jenkins_username }}"
               password: "{{ all_tools_password }}"
-            service:
-              type: LoadBalancer
+            serviceType: LoadBalancer
       when: jenkins_status.rc != 0
 
     # ----------------------------
