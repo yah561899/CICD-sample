@@ -67,7 +67,7 @@
       become: false
 
     - name: Start Minikube cluster if not running
-      command: minikube start -p {{ cluster_name }} --driver={{ minikube_driver }} --force
+      command: minikube start -p {{ cluster_name }} --driver={{ minikube_driver }} --cpus=4 --memory=8192 --force
       when: "'Running' not in minikube_status.stdout"
       become: false
 
